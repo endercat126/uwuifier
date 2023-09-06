@@ -2,7 +2,7 @@
 
 # uwuifier.py
 
-# Version 0.0.5
+# Version 0.6
 # Copyright (c) 2023 Endercat126
 # MIT License
 
@@ -10,7 +10,7 @@ import sys
 import random
 
 
-VERSION = "0.0.5"
+VERSION = "0.6"
 
 faces = [">.<", ":3", "^-^", "^.^", ">w<", "^.~", "~.^", ">.<", "^o^", "^_^", ">.>", "^3^", "^-^'", "^.^'", ">.<'", "^o^'", "^_^'", ">.>'", "^3^'"]
 
@@ -69,6 +69,7 @@ if __name__ == "__main__":
             text = ""
             with open(sys.argv[2], "r") as f:
                 text = f.read()
+                text = text.rstrip("\n")
             print(uwuify(text))
         else:
             print(uwuify(sys.argv[1]))
