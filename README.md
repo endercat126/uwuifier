@@ -1,5 +1,6 @@
 # uwuifier
 very bad bad bad software never ever use it its so silly and bad aaaaaaaaaaaaaaaaaj
+unless youre zilly then pls use it (i know zilly loves being kawaii)
 
 - ⚡ blazingly fast
 - 🌸 kawaii
