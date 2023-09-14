@@ -31,12 +31,16 @@ class fx:
     italic = "\033[3m"
     underline = "\033[4m"
     reverse = "\033[7m"
+    strikethrough = "\033[9m"
     dim = dull
     faint = dull
     strong = bold
     invert = reverse
     inverse = reverse
     oblique = italic
+    disabled = strikethrough
+    linethrough = strikethrough
+    crossedout = strikethrough
 
 def demo():
     print(fg.black + "fg.black  " + "        " + fx.dull + "+ dull" + fx.reset)

@@ -1,8 +1,9 @@
 #! /usr/bin/env python3
+# PYTHON_ARGCOMPLETE_OK
 
 # uwuifier.py
 
-VERSION = "0.7-b3"
+VERSION = "0.7"
 LICENSE = "MIT"
 
 # Copyright (c) 2023 Endercat126
@@ -199,16 +200,24 @@ class CustomArgumentParser(argparse.ArgumentParser):
             line = "  "
 
             line += ansi.fg.green
+
+            if action.help.endswith('/soon/'):
+                line += ansi.fx.dull + ansi.fx.strikethrough
             
             for opt in action.option_strings:
                 line += opt + " "
+
+            line += ansi.fx.reset
             
             line += " " * (30 - len(str(action.option_strings)))
 
             line += ansi.fg.yellow
-            line += action.help.rstrip('//') + " " + ansi.fx.dull + get_kaomoji()
+            if action.help.endswith('/soon/'):
+                line += ansi.fx.dull + ansi.fx.strikethrough + action.help.rstrip('/soon/').rstrip('/n/') + ansi.fx.reset + ansi.fx.dull + ansi.fg.yellow + " (COMMING SOON)"
+            else:
+                line += action.help.rstrip('/n/') + " " + ansi.fx.dull + get_kaomoji()
 
-            if action.help.endswith('//'):
+            if action.help.rstrip('/soon/').endswith('/n/'):
                 line += "\n"
 
             line += ansi.fx.reset
@@ -235,15 +244,17 @@ def cli() -> int:
     parser.add_argument('-h', '--help', help='Show this help message and exit', action='help')
     parser.add_argument('-s', '--substitutions', help='Toggle substitutions', action='store_true')
     parser.add_argument('-k', '--kaomoji', help='Toggle kaomoji', action='store_true')
-    parser.add_argument('-e', '--emojis', help='Toggle emojis', action='store_true')
+    parser.add_argument('-e', '--emojis', help='Toggle emojis/soon/', action='store_true')
     parser.add_argument('-u', '--keep_case', help='Keep case (experimental)', action='store_true')
-    parser.add_argument('-d', '--debug', help='Enable debugging info//', action='store_true')
+    parser.add_argument('-d', '--debug', help='Enable debugging info/n/', action='store_true')
     
     parser.add_argument('-p', '--plain', help='Plain text output (no fancy colours)', action='store_true')
     parser.add_argument('-i', '--input', help='Input file', type=str)
-    parser.add_argument('-o', '--output', help='Output file//', type=str)
+    parser.add_argument('-o', '--output', help='Output file/n/', type=str)
 
     parser.add_argument('-c', '--config', help='Specify a config file location', type=str, default="~/.config/uwuifier/config.json")
+
+    argcomplete.autocomplete(parser)
 
     args = parser.parse_args()
 
