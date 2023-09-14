@@ -2,7 +2,7 @@
 
 # uwuifier.py
 
-VERSION = "0.7-b2"
+VERSION = "0.7-b3"
 LICENSE = "MIT"
 
 # Copyright (c) 2023 Endercat126
@@ -14,53 +14,32 @@ import sys
 import argparse
 import argcomplete
 import json
+import os
 
 import ender_ansi as ansi
 
 # --- Data ---
-
-# # some kawaii faces
-# kaomoji = [">.<", ":3", "^-^", "^.^", ">w<", "^.~", "~.^", ">.<", "^o^", "^_^", ">.>", "^3^", "^-^'", "^.^'", ">.<'", "^o^'",
-#            "^_^'", ">.>'", "^3^'", "(*^ω^)", "(*≧ω≦)", "(｡♥‿♥｡)", "(*´∀`)", "(°▽°)", "(╯✧▽✧)╯", "(＾◡＾)", "(⁄ ⁄•⁄ω⁄•⁄ ⁄)", "(*≧▽≦)", "(≧◡≦)"]
-
-# # some cute emojis
-# emojis = {
-#     "happy": ['😺', '😸'],
-#     "sad": ['😿', '😢'],
-#     "angry": ['😡', '😾', '👿'],
-#     "love": ['💖', '💕', '💝', '💘'],
-#     "cute": ['🌸', '⭐', '✨', '🍭', '🍪'],
-#     "surprise": ['😮', '🙀'],
-#     "sus": ['🧐', '😳', '💀']
-# }
-
-# # characters that will be changed
-# substitutions = {
-#     "you": "yu",
-#     "ove": "uv",
-#     "w": "ww",
-#     "r": "w",
-#     "l": "w",
-#     "y ": "yy ",
-#     "- ": "~ "
-# }
-
-# # words that are already cute enough!
-# preserve = ["uwu", "meow", "nyaa", "kawaii"]
-
-
-# # --- Parameters --
-
-# enable_substitutions = True
-# enable_kaomoji = True
-# enable_emojis = False
-# keep_case = False
-# debug = False
+kaomoji = [">.<", ":3", "^-^", "^.^", ">w<", "^.~", "~.^", ">.<", "^o^", "^_^", ">.>", "^3^"]
+emojis = {}
+substitutions = {}
+preserve = []
+enable_substitutions = True
+enable_kaomoji = True
+enable_emojis = True
+keep_case = False
+debug = False
 
 # --- Functions ---
 
-def load_config():
-    with open("default_config.json", "r") as f:
+def load_config(config_path: str) -> None:
+    config_path = os.path.expanduser(config_path)
+
+    if not os.path.exists(config_path):
+        # Copy `default_config.json` to `~/.config/uwuifier/config.json`
+        print(ansi.fg.red + "Config file not found!\n" + ansi.fx.dull + "Please create a config file at `" + config_path + "`\n" + ansi.fx.reset)
+        config_path = "default_config.json"
+
+    with open(config_path, "r") as f:
         config = json.load(f)
     
     global kaomoji
@@ -86,6 +65,8 @@ def load_config():
     enable_emojis = config["defaults"]["enable_emojis"]
     keep_case = config["defaults"]["keep_case"]
     debug = config["defaults"]["debug"]
+
+    print_debug("Loaded config from: " + ansi.fg.cyan + config_path + ansi.fx.reset + "\n", ansi.fx.reset)
 
 def underline(text: str, char: str = "-") -> str:
     line = ""
@@ -124,32 +105,18 @@ def print_debug(text: str, colour: str = ansi.fg.yellow, error: bool = False) ->
             print(colour + text + ansi.fx.reset)
 
 
-def replace_but_keep_case(input_text: str, old_sub: str, new_sub: str) -> str:
-    case = ""
-    if input_text.isupper():
-        case = "upper"
-    elif input_text.istitle():
-        case = "title"
-    elif is_spongebob(input_text):
-        case = "spongebob"
+def replace_but_keep_case(text: str, old_sub: str, new_sub: str) -> str:
+    lower_text = text.lower()
+    modified_string = lower_text.replace(old_sub, new_sub)
+
+    if text.isupper():
+        return modified_string.upper()
+    elif text.istitle():
+        return modified_string.title()
+    elif is_spongebob(text):
+        return to_spongebob(modified_string)
     else:
-        case = "lower"
-
-    lower_text = input_text.lower()
-    new_string = lower_text.replace(old_sub, new_sub)
-
-    corrected_string = ""
-
-    if case == "upper":
-        corrected_string = new_string.upper()
-    elif case == "title":
-        corrected_string = new_string.title()
-    elif case == "spongebob":
-        corrected_string = to_spongebob(new_string)
-    else:
-        corrected_string = new_string
-
-    return corrected_string
+        return modified_string
 
 
 def get_sentences(input_text: str) -> list:
@@ -263,19 +230,20 @@ class CustomArgumentParser(argparse.ArgumentParser):
 # --- Main ---
 
 def cli() -> int:
-    load_config()
-
     parser = CustomArgumentParser(description="UwUifier: make your text cute!", add_help=False)
 
     parser.add_argument('-h', '--help', help='Show this help message and exit', action='help')
     parser.add_argument('-s', '--substitutions', help='Toggle substitutions', action='store_true')
     parser.add_argument('-k', '--kaomoji', help='Toggle kaomoji', action='store_true')
     parser.add_argument('-e', '--emojis', help='Toggle emojis', action='store_true')
-    parser.add_argument('-c', '--keep_case', help='Keep case (experimental)', action='store_true')
+    parser.add_argument('-u', '--keep_case', help='Keep case (experimental)', action='store_true')
     parser.add_argument('-d', '--debug', help='Enable debugging info//', action='store_true')
     
+    parser.add_argument('-p', '--plain', help='Plain text output (no fancy colours)', action='store_true')
     parser.add_argument('-i', '--input', help='Input file', type=str)
-    parser.add_argument('-o', '--output', help='Output file', type=str)
+    parser.add_argument('-o', '--output', help='Output file//', type=str)
+
+    parser.add_argument('-c', '--config', help='Specify a config file location', type=str, default="~/.config/uwuifier/config.json")
 
     args = parser.parse_args()
 
@@ -291,9 +259,7 @@ def cli() -> int:
     keep_case = not keep_case if args.keep_case else keep_case
     debug = not debug if args.debug else debug
 
-    # text = input(ansi.fg.green + "Enter a message:\n" + ansi.fg.blue)
-    # print(ansi.fx.reset)
-    # print(ansi.fg.pink + uwuify(text))
+    load_config(args.config)
 
     text = ""
 
@@ -306,12 +272,15 @@ def cli() -> int:
     if args.output:
         with open(args.output, "w") as f:
             f.write(uwuify(text) + "\n")
+    elif args.plain:
+        print(uwuify(text))
     else:
         print(ansi.fg.pink + uwuify(text))
 
     return 0
 
 
-# when run as a script
+# --- When run as a script ---
+
 if __name__ == "__main__":
     sys.exit(cli())
