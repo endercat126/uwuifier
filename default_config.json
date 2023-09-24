@@ -54,6 +54,7 @@
         "enable_kaomoji": true,
         "enable_emojis": false,
         "keep_case": false,
-        "debug": false
+        "debug": false,
+		"loop": false
     }
 }

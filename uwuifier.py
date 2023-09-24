@@ -288,6 +288,10 @@ def cli() -> int:
     else:
         print(ansi.fg.pink + uwuify(text))
 
+
+    if not 'PROMPT' in os.environ:
+        input()
+
     return 0
 
 
