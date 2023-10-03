@@ -289,7 +289,7 @@ def cli() -> int:
         print(ansi.fg.pink + uwuify(text))
 
 
-    if not 'PROMPT' in os.environ:
+    if os.name == 'nt' and not 'PROMPT' in os.environ:
         input()
 
     return 0
