@@ -53,7 +53,7 @@ make install
 
 
 ## Warning
-This program is incredibly goofy. If it makes your text cringe and you get bullied for it, L.
+dont use this around maxwell gameing its too cute for him
 
 ## License
 Copyright (c) 2023 Endercat126. This software is licensed under the permissive MIT license.
